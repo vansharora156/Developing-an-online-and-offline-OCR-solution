@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro OCR | Advanced AI Text Extraction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --bg-dark: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #22d3ee;
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(34, 211, 238, 0.1) 0, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @media (max-width: 850px) {
+      .main-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--glass-border);
+      border-radius: 20px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      background: rgba(15, 23, 42, 0.3);
+    }
+
+    .drop-zone:hover,
+    .drop-zone.active {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .drop-zone i {
+      width: 48px;
+      height: 48px;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .drop-zone input {
+      display: none;
+    }
+
+    .preview-container {
+      margin-top: 1.5rem;
+      display: none;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--glass-border);
+    }
+
+    .preview-container img {
+      width: 100%;
+      display: block;
+    }
+
+    .controls {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .lang-select-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    select {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      outline: none;
+      cursor: pointer;
+      font-size: 1rem;
+      appearance: none;
+    }
+
+    .action-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .action-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .output-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .output-area {
+      flex-grow: 1;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-main);
+      resize: none;
+      min-height: 300px;
+      outline: none;
+    }
+
+    .output-area::placeholder {
+      color: var(--text-muted);
+    }
+
+    .output-actions {
+      margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .secondary-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 0.75rem 1.25rem;
+      border-radius: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .status-loading {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+    }
+
+    .status-success {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .loader {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-container">
+    <!-- Input Side -->
+    <div class="card">
+      <div class="header">
+        <h1>Pro OCR</h1>
+        <p>Advanced AI Text Extraction</p>
+      </div>
+
+      <div class="drop-zone" id="dropZone">
+        <i data-lucide="cloud-upload"></i>
+        <h3>Click or drag image here</h3>
+        <p>Supports JPG, PNG, JPEG</p>
+        <input type="file" id="fileInput" accept="image/*">
+      </div>
+
+      <div class="preview-container" id="previewContainer">
+        <img id="imagePreview" src="" alt="Preview">
+      </div>
+
+      <div class="controls">
+        <div class="lang-select-container">
+          <label style="font-size: 0.85rem; color: var(--text-muted);">Select Language</label>
+          <select id="langSelect">
+            <option value="en">English (Default)</option>
+            <option value="hi">Hindi</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="es">Spanish</option>
+            <option value="ch_sim">Chinese (Simplified)</option>
+            <option value="ja">Japanese</option>
+            <option value="ko">Korean</option>
+          </select>
+        </div>
+
+        <button class="action-btn" id="extractBtn" disabled>
+          <i data-lucide="scan-text"></i>
+          <span>Extract Text</span>
+        </button>
+
+        <div class="status-badge" id="statusBadge">
+          <div class="loader" id="statusLoader"></div>
+          <span id="statusText">Processing...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output Side -->
+    <div class="card">
+      <div class="output-container">
+        <div class="output-header">
+          <h3 style="font-weight: 600;">Results</h3>
+          <div style="display: flex; gap: 0.5rem;" id="resultActions">
+            <button class="secondary-btn" id="copyBtn" title="Copy to clipboard">
+              <i data-lucide="copy"></i>
+            </button>
+          </div>
+        </div>
+        <textarea class="output-area" id="outputArea" placeholder="Extracted text will appear here..."
+          readonly></textarea>
+
+        <div class="output-actions">
+          <button class="secondary-btn" id="downloadTxt" disabled>
+            <i data-lucide="file-text"></i>
+            <span>Text</span>
+          </button>
+          <button class="secondary-btn" id="downloadJson" disabled>
+            <i data-lucide="code"></i>
+            <span>JSON</span>
+          </button>
+          <button class="secondary-btn" id="clearBtn">
+            <i data-lucide="trash-2"></i>
+            <span>Clear</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewContainer = document.getElementById('previewContainer');
+    const extractBtn = document.getElementById('extractBtn');
+    const outputArea = document.getElementById('outputArea');
+    const langSelect = document.getElementById('langSelect');
+    const statusBadge = document.getElementById('statusBadge');
+    const statusText = document.getElementById('statusText');
+    const statusLoader = document.getElementById('statusLoader');
+    const downloadTxt = document.getElementById('downloadTxt');
+    const downloadJson = document.getElementById('downloadJson');
+    const copyBtn = document.getElementById('copyBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    let currentFile = null;
+    let latestResult = null;
+
+    // Drop Zone Interaction
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('active');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('active');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('active');
+      if (e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file (JPG, PNG, JPEG)');
+        return;
+      }
+
+      currentFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        previewContainer.style.display = 'block';
+        dropZone.style.display = 'none';
+        extractBtn.disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // OCR Execution
+    extractBtn.addEventListener('click', async () => {
+      if (!currentFile) return;
+
+      const formData = new FormData();
+      formData.append('file', currentFile);
+      formData.append('lang', langSelect.value);
+
+      // UI Update
+      extractBtn.disabled = true;
+      statusBadge.style.display = 'inline-flex';
+      statusBadge.className = 'status-badge status-loading';
+      statusText.innerText = 'Extracting text...';
+      statusLoader.style.display = 'block';
+      outputArea.value = '';
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/ocr/', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          latestResult = result.data;
+          outputArea.value = latestResult.full_text;
+
+          statusBadge.className = 'status-badge status-success';
+          statusText.innerText = 'Extraction complete!';
+          statusLoader.style.display = 'none';
+
+          downloadTxt.disabled = false;
+          downloadJson.disabled = false;
+        } else {
+          throw new Error(result.detail || 'OCR failed');
+        }
+      } catch (error) {
+        console.error(error);
+        statusBadge.className = 'status-badge status-loading';
+        statusBadge.style.background = 'rgba(239, 68, 68, 0.1)';
+        statusBadge.style.color = '#ef4444';
+        statusText.innerText = 'Error: ' + error.message;
+        statusLoader.style.display = 'none';
+      } finally {
+        extractBtn.disabled = false;
+      }
+    });
+
+    // Actions
+    copyBtn.addEventListener('click', () => {
+      if (!outputArea.value) return;
+      navigator.clipboard.writeText(outputArea.value);
+      const originalIcon = copyBtn.innerHTML;
+      copyBtn.innerHTML = '<i data-lucide="check"></i>';
+      lucide.createIcons();
+      setTimeout(() => {
+        copyBtn.innerHTML = originalIcon;
+        lucide.createIcons();
+      }, 2000);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      currentFile = null;
+      latestResult = null;
+      fileInput.value = '';
+      imagePreview.src = '';
+      previewContainer.style.display = 'none';
+      dropZone.style.display = 'block';
+      outputArea.value = '';
+      extractBtn.disabled = true;
+      statusBadge.style.display = 'none';
+      downloadTxt.disabled = true;
+      downloadJson.disabled = true;
+    });
+
+    downloadTxt.addEventListener('click', () => {
+      if (!outputArea.value) return;
+      const blob = new Blob([outputArea.value], { type: 'text/plain' });
+      downloadBlob(blob, 'ocr_result.txt');
+    });
+
+    downloadJson.addEventListener('click', () => {
+      if (!latestResult) return;
+      const blob = new Blob([JSON.stringify(latestResult, null, 4)], { type: 'application/json' });
+      downloadBlob(blob, 'ocr_result.json');
+    });
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+# Virtual Environments
+venv/
+env/
+.env
+
+# Cache files
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Output directories
+output/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
