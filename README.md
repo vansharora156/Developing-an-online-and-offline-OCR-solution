@@ -27,7 +27,7 @@
 
 ## 📸 Preview of the Application
 
-![Frontend UI Overview](https://img.shields.io/badge/UI-Sleek_and_Modern-blueviolet)
+![Frontend UI Overview](OCR.png)
 
 <p align="center">
   <em>(A fully responsive frontend interface running on your local container seamlessly taking image inputs and returning extracted text structures)</em>
